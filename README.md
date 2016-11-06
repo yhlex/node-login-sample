@@ -1,21 +1,27 @@
-# Node.js Loginapp
-
-This is a user login and registration app using Node.js, Express, Passport and Mongoose. It is part of the YouTube series [here](https://www.youtube.com/watch?v=Z1ktxiqyiLA)
-
-### Version
-1.1.0
+# Node Login Sample
 
 ### Usage
-
+A simple node.js login sample that demostrates the use of the [SDK(Under Construction)](/) for Symantec's VIP Multi-Factor Authentication Services
 
 ### Installation
 
-Loginapp requires [Node.js](https://nodejs.org/) v4+ to run.
+[Node.js](https://nodejs.org/)
+[MongoDB](https://www.mongodb.com/lp/download/mongodb-enterprise?jmp=nav)
+
+### Run
 
 ```sh
-$ npm install
+npm install
 ```
 
 ```sh
-$ npm start
+npm start
 ```
+or
+
+```sh
+node app
+```
+
+### Author
+Team Symantec, MSU Capstone
