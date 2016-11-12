@@ -1,4 +1,5 @@
 var express = require('express');
+var sleep = require('sleep');
 var router = express.Router();
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -26,14 +27,19 @@ router.get('/fail',function(req,res){
 router.post('/authenticate',function(req,res){
 	var user = require('soteria-node/lib/user');
 	var authenticate = require('soteria-node/lib/authenticate');
+	var qu = require('soteria-node/lib/query')
 
 	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem ', true);
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
 
 	var auth = new authenticate('http://webdev.cse.msu.edu/~morcoteg/Symantec/WSDL/vipuserservices-auth-1.7.wsdl',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib//vip_certificate.crt',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib//key.pem', true);
+
+	var q = new qu('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-query-1.7.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
 
 	// console.log()
 	// auth.authenticateCredentialWithPush('VSMT66551388', 'This is a push message from Team Symantec. Accept Push to verify identity.', function(res) {
@@ -42,7 +48,7 @@ router.post('/authenticate',function(req,res){
 
 	console.log(res.locals.user);
 	var codeinput = req.body.otpcode;
-	var smsinput = req.body.sms;
+	var smsinput = req.body.smscode;
 	console.log(codeinput);
 	if(codeinput!=""){
 		auth.authenticateUserByUserID_OTP(res.locals.user.username, codeinput, function(result) {
@@ -51,6 +57,24 @@ router.post('/authenticate',function(req,res){
 				res.redirect('/users/success')
 			}
 		});
+	}
+	console.log(codeinput,smsinput)
+	if(smsinput==""&&codeinput==""){
+		auth.authenticateUserWithPush(res.locals.user.username, 'This is a push message from Team Symantec. Accept Push to verify identity.', function(res1) {
+			sleep.sleep(5);
+			q.pollPushStatus(res1.transactionId,function(res2){
+				console.log(res2.message)
+				if(res2.message=='Mobile push request approved by user'){
+					res.redirect("/users/success")
+
+				}
+				else{
+					res.redirect('/users/fail')
+				}
+			})
+
+
+			});
 	}
 	else{
 		res.redirect('/users/fail')

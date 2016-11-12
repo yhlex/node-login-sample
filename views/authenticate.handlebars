@@ -6,20 +6,51 @@
 
 <form method="post" action="/users/authenticate" style="text-align: center;">
     <div class="btn-group" data-toggle="buttons">
-    <label class="btn btn-primary active">
-    <input type="radio" name="options" id="push" autocomplete="off" checked> Push
+    <label name="selection" class="btn btn-primary">
+    <input type="radio" name="options" id="push" autocomplete="off"> Push
     </label>
 
-    <label class="btn btn-primary">
+    <label name="selection" class="btn btn-primary">
     <input type="radio" name="options" id="sms" autocomplete="off"> SMS
     </label>
-    <label class="btn btn-primary">
+    <label name="selection" class="btn btn-primary">
     <input type="radio" name="options" id="code" autocomplete="off"> 6-Digit Code
     </label>
         <!--<br>-->
         <!--<input type="text" name="otpcode">-->
         <br>
-        <input type="text" class="otp" name="otpcode">
+        <input type="text" class="otp" name="otpcode" placeholder="Enter Your 6-Digit Code">
+        <input type="text" class="otp" name="smscode" placeholder="Enter Your SMS OTP Code">
     </div>
     <button type="submit" name="submit" class="btn btn-primary">Submit</button>
 </form>
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        var otpcode = $('input[name=otpcode]')[0];
+        var smscode = $('input[name=smscode]')[0];
+        otpcode.style.display ="none";
+        smscode.style.display ="none";
+        $('label.btn-primary').click(function(){
+            event.preventDefault();
+            var selectedRadio = $(this).find('input')[0];
+            console.log(selectedRadio);
+            if(selectedRadio.id=="sms"){
+                smscode.style.display = "block";
+                otpcode.style.display = "none";
+            }
+            else if(selectedRadio.id=="code"){
+                otpcode.style.display = "block";
+                smscode.style.display = "none";
+            }
+            else{
+                otpcode.style.display ="none";
+                smscode.style.display ="none";
+            }
+
+        })
+
+        
+    });
+
+</script>
