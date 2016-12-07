@@ -24,8 +24,21 @@ router.get('/success',function(req,res){
 router.get('/fail',function(req,res){
 	res.render('fail');
 });
-router.post('/authenticate',function(req,res){
-	var user = require('soteria-node/lib/user');
+router.post('/sendOtp',function(req, res){
+	var user = require('soteria-node/lib/management');
+
+	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+	console.log(res.locals.user.name)
+	u.sendOtp("test@beta.com", res.locals.user.name, function(result){
+		res.redirect("/users/authenticate");
+	})
+
+
+});
+router.post('/authenticate',function(req, res){
+	var user = require('soteria-node/lib/management');
 	var authenticate = require('soteria-node/lib/authenticate');
 	var qu = require('soteria-node/lib/query')
 
@@ -41,61 +54,92 @@ router.post('/authenticate',function(req,res){
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
 
-	// console.log()
-	// auth.authenticateCredentialWithPush('VSMT66551388', 'This is a push message from Team Symantec. Accept Push to verify identity.', function(res) {
-	// 	console.log(res);
-	// });
 
-	console.log(res.locals.user);
+
+
+
 	var codeinput = req.body.otpcode;
 	var smsinput = req.body.smscode;
-	console.log(codeinput);
-	if(codeinput!=""){
+	console.log(req.body.options)
+	if(req.body.options=="code"){
 		auth.authenticateUserByUserID_OTP(res.locals.user.username, codeinput, function(result) {
 			console.log(result);
 			if(result.success==1){
-				res.redirect('/users/success')
+
+				return res.redirect("/users/success")
+
 			}
+			else{
+				res.redirect('/users/fail')
+			}
+
+		console.log(locations)
 		});
 	}
-	console.log(codeinput,smsinput)
-	if(smsinput==""&&codeinput==""){
-		auth.authenticateUserWithPush(res.locals.user.username, 'This is a push message from Team Symantec. Accept Push to verify identity.', function(res1) {
+	console.log("code:",codeinput,"sms:",smsinput);
+
+	if(req.body.options=="push"){
+		var locations;
+		auth.authenticateUserWithPush(res.locals.user.username, 'This is a push message from Team Symantec. ' +
+			'Accept Push to verify identity.', function(res1) {
+
 			sleep.sleep(5);
+
 			q.pollPushStatus(res1.transactionId,function(res2){
-				console.log(res2.message)
+				console.log(res2.message);
 				if(res2.message=='Mobile push request approved by user'){
-					res.redirect("/users/success")
+					console.log("yes");
+
+					return res.redirect("/users/success")
 
 				}
 				else{
-					res.redirect('/users/fail')
+					if(res2.message=='Mobile push request in progress'){
+						req.flash("error_msg", "Time Out")
+					}
+					res.redirect("/users/fail")
 				}
-			})
-
-
 			});
+
+		});
 	}
-	else{
-		res.redirect('/users/fail')
+
+
+	if(req.body.options == "sms"){
+		console.log("==="+res.locals.user.name)
+		auth.authenticateCredentialSMS(res.locals.user.name, smsinput, function(result){
+			//console.log(req.headers)
+			if(result.success == 1){
+				return res.redirect("/users/success")
+			}
+			else{
+				return res.redirect('/users/fail')
+			}
+		});
 	}
-	//res.redirect('/users/success');
 
 
 });
 // Register User
 router.post('/register', function(req, res){
+	var user = require('soteria-node/lib/management');
+
+	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+
 	console.log('registering');
 	var name = req.body.name;
 	var email = req.body.email;
+	var otp  = req.body.otp;
 	var username = req.body.username;
 	var password = req.body.password;
 	var password2 = req.body.password2;
 	console.log(name);
 	// Validation
-	req.checkBody('name', 'Name is required').notEmpty();
-	req.checkBody('email', 'Email is required').notEmpty();
-	req.checkBody('email', 'Email is not valid').isEmail();
+	req.checkBody('name', 'Phone Number is required').notEmpty();
+	req.checkBody('email', 'CredentialID is required').notEmpty();
+	//req.checkBody('email', 'Email is not valid').isEmail();
 	req.checkBody('username', 'Username is required').notEmpty();
 	req.checkBody('password', 'Password is required').notEmpty();
 	req.checkBody('password2', 'Passwords do not match').equals(req.body.password);
@@ -114,10 +158,31 @@ router.post('/register', function(req, res){
 			password: password
 		});
 
-		User.createUser(newUser, function(err, user){
+
+		User.createNewUser(newUser, function(err, user){
 			if(err) throw err;
 			console.log(user);
+
 		});
+
+		u.createUser(username, password, function(result){
+			console.log("New User")
+			//console.log(result)
+			//return;
+
+			u.addCredential(username, name, "SMS_OTP", null, function(result){
+				console.log("SMS REG")
+				//console.log(result);
+				//return;
+			})
+			u.addCredential(username, email, "STANDARD_OTP",null,function(result){
+				console.log("MB REG")
+				//console.log(result);
+				//return;
+			})
+		})
+
+
 
 		req.flash('success_msg', 'You are registered and can now login');
 
@@ -159,6 +224,7 @@ passport.deserializeUser(function(id, done) {
 router.post('/login',
   passport.authenticate('local', {successRedirect:'authenticate', failureRedirect:'/users/login',failureFlash: true}),
   function(req, res) {
+
     // console.log("success");
 	 //  console.log(req.body.username);
     // res.redirect('/authenticate');

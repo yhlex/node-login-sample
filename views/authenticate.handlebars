@@ -4,53 +4,80 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <!-- Indicates a successful or positive action -->
 
-<form method="post" action="/users/authenticate" style="text-align: center;">
+<form method="post" action="/users/authenticate" class="authForm" style="text-align: center;">
     <div class="btn-group" data-toggle="buttons">
+        <label name="selection" class="btn btn-primary">
+            <input type="radio" name="options" id="sms" value="sms" autocomplete="off"> SMS
+        </label>
     <label name="selection" class="btn btn-primary">
-    <input type="radio" name="options" id="push" autocomplete="off"> Push
+    <input type="radio" name="options" id="push" value="push" autocomplete="off"> Push
     </label>
 
+
     <label name="selection" class="btn btn-primary">
-    <input type="radio" name="options" id="sms" autocomplete="off"> SMS
-    </label>
-    <label name="selection" class="btn btn-primary">
-    <input type="radio" name="options" id="code" autocomplete="off"> 6-Digit Code
+    <input type="radio" name="options" id="code" value="code" autocomplete="off"> 6-Digit Code
     </label>
         <!--<br>-->
         <!--<input type="text" name="otpcode">-->
         <br>
-        <input type="text" class="otp" name="otpcode" placeholder="Enter Your 6-Digit Code">
-        <input type="text" class="otp" name="smscode" placeholder="Enter Your SMS OTP Code">
+        <input type="text" class="otp" name="otpcode" maxlength="6" placeholder="Enter Your 6-Digit Code">
+        <input type="text" class="otp" name="smscode" maxlength="6" placeholder="Enter Your SMS OTP Code">
     </div>
-    <button type="submit" name="submit" class="btn btn-primary">Submit</button>
+    <!--<button type="submit" id="sendsms" name="send" class="btn btn-primary">Send</button>-->
+    <button type="submit" id="auth" name="submit" class="btn btn-primary authbtn">Submit</button>
+</form>
+
+<form method="post" action="/users/sendOtp" id="sendOtp" class="sendForm" style="text-align: center;">
+    <button type="submit" name="send" class="btn btn-primary sendbtn">Send</button>
 </form>
 <script type="text/javascript">
     $(document).ready(function() {
-
+        var sendbtn = $('button[name=send]')[0];
         var otpcode = $('input[name=otpcode]')[0];
         var smscode = $('input[name=smscode]')[0];
         otpcode.style.display ="none";
         smscode.style.display ="none";
+        sendbtn.style.display = "none"
         $('label.btn-primary').click(function(){
             event.preventDefault();
             var selectedRadio = $(this).find('input')[0];
             console.log(selectedRadio);
             if(selectedRadio.id=="sms"){
-                smscode.style.display = "block";
+                smscode.style.display = "inline-block";
                 otpcode.style.display = "none";
+                sendbtn.style.display = "inline-block"
             }
             else if(selectedRadio.id=="code"){
-                otpcode.style.display = "block";
+                otpcode.style.display = "inline-block";
                 smscode.style.display = "none";
+                sendbtn.style.display = "none"
             }
             else{
                 otpcode.style.display ="none";
                 smscode.style.display ="none";
+                sendbtn.style.display = "none"
             }
 
         })
+//        $('#sendsms').click(function(){
+//            console.log('button clicked');
+//            $.ajax({url: 'sendsms', success:function(res){
+//                console.log('server response is', res);
+//            }});
+//        });
+//        $('#auth').click(function(){
+//            console.log('button clicked');
+//            $.ajax({url: 'auth', success:function(res){
+//                console.log('server response is', res);
+//            }});
+//        });
 
-        
+//        $('#sendOtp').submit(function (e) {
+//            e.preventDefault();
+//
+//        });
+
+
     });
 
 </script>
