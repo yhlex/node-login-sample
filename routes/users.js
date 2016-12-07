@@ -43,16 +43,16 @@ router.post('/authenticate',function(req, res){
 	var qu = require('soteria-node/lib/query')
 
 	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+		'./node_modules/soteria-node/lib/vip_certificate.crt',
+		'./node_modules/soteria-node/lib/key.pem', true);
 
 	var auth = new authenticate('http://webdev.cse.msu.edu/~morcoteg/Symantec/WSDL/vipuserservices-auth-1.7.wsdl',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib//vip_certificate.crt',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib//key.pem', true);
+		'./node_modules/soteria-node/lib//vip_certificate.crt',
+		'./node_modules/soteria-node/lib//key.pem', true);
 
 	var q = new qu('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-query-1.7.wsdl',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
-		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+		'./node_modules/soteria-node/lib/vip_certificate.crt',
+		'./node_modules/soteria-node/lib/key.pem', true);
 
 
 
