@@ -1,7 +1,7 @@
 # Node Login Sample
 
 ### Usage
-A simple node.js login sample that demostrates the use of the [SDK(Under Construction)](/) for Symantec's VIP Multi-Factor Authentication Services
+A simple node.js login sample that demostrates the use of the [Soteria](https://github.com/ryanrampage1/soteria-node) for Symantec's VIP Multi-Factor Authentication Services
 
 ### Installation
 
