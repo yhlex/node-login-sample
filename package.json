@@ -1,18 +1,19 @@
 {
-  "name": "loginapp",
+  "name": "Soteria-node-sample",
   "version": "1.0.0",
-  "description": "Simple authentication system",
+  "description": "Simple multi factor authentication demo",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Brad Traversy",
-  "license": "ISC",
+  "author": "Henry Ye",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "*",
     "body-parser": "*",
     "connect-flash": "*",
     "cookie-parser": "^1.4.1",
+    "ejs": "*",
     "express": "*",
     "express-handlebars": "*",
     "express-messages": "*",
@@ -22,6 +23,20 @@
     "mongoose": "*",
     "passport": "*",
     "passport-http": "*",
-    "passport-local": "*"
-  }
+    "passport-local": "*",
+    "passport-stormpath": "*",
+    "sleep": "*",
+    "soap": "*",
+    "soteria": "*"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yhlex/node-login-sample.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/yhlex/node-login-sample/issues"
+  },
+  "homepage": "https://github.com/yhlex/node-login-sample#readme"
 }

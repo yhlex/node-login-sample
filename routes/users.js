@@ -24,6 +24,43 @@ router.get('/success',function(req,res){
 router.get('/fail',function(req,res){
 	res.render('fail');
 });
+router.get('/activate', function(req, res){
+	res.render('activate');
+});
+
+router.post('/activate', function(req, res){
+	var p = require('soteria-node/lib/provision')
+	var pro = new p('http://webdev.cse.msu.edu/~huynhall/vip_auth.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+	var user = require('soteria-node/lib/management');
+
+	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
+	
+
+	console.log(res.locals.user,req.body,req.body.activationCode)
+	pro.activateToken(res.locals.user.name, req.body.activationCode, function(result){
+		console.log("activate Phone")
+		console.log(result)
+		if(result.success==1){
+			u.addCredential(res.locals.user.username, res.locals.user.name, "SMS_OTP", null, function(result){
+				console.log("SMS ADDED")
+				//console.log(result);
+				//return;
+			});
+			return res.redirect("/users/authenticate");
+		}
+		else{
+			req.flash("error_msg","Activation faield");
+			return res.redirect("/users/activate");
+		}
+	});
+
+});
+
+
 router.post('/sendOtp',function(req, res){
 	var user = require('soteria-node/lib/management');
 
@@ -31,13 +68,15 @@ router.post('/sendOtp',function(req, res){
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
 	console.log(res.locals.user.name)
-	u.sendOtp("test@beta.com", res.locals.user.name, function(result){
+	u.sendOtp(res.locals.user.username, res.locals.user.name, function(result){
 		res.redirect("/users/authenticate");
 	})
 
 
+
 });
 router.post('/authenticate',function(req, res){
+	console.log(res.locals)
 	var user = require('soteria-node/lib/management');
 	var authenticate = require('soteria-node/lib/authenticate');
 	var qu = require('soteria-node/lib/query')
@@ -83,7 +122,7 @@ router.post('/authenticate',function(req, res){
 		auth.authenticateUserWithPush(res.locals.user.username, 'This is a push message from Team Symantec. ' +
 			'Accept Push to verify identity.', function(res1) {
 
-			sleep.sleep(5);
+			sleep.sleep(8);
 
 			q.pollPushStatus(res1.transactionId,function(res2){
 				console.log(res2.message);
@@ -127,7 +166,10 @@ router.post('/register', function(req, res){
 	var u = new user('http://webdev.cse.msu.edu/~yehanlin/vip/vipuserservices-mgmt-1.7.wsdl',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
 		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
-
+	var p = require('soteria-node/lib/provision')
+	var pro = new p('http://webdev.cse.msu.edu/~huynhall/vip_auth.wsdl',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/vip_certificate.crt',
+		'/Users/hanlinye/Desktop/node-sample/loginapp-master/node_modules/soteria-node/lib/key.pem', true);
 	console.log('registering');
 	var name = req.body.name;
 	var email = req.body.email;
@@ -169,11 +211,15 @@ router.post('/register', function(req, res){
 			console.log("New User")
 			//console.log(result)
 			//return;
-
-			u.addCredential(username, name, "SMS_OTP", null, function(result){
+			u.register(name, function(result){
 				console.log("SMS REG")
-				//console.log(result);
-				//return;
+			})
+			pro.activateToken(name, function(result){
+				console.log("activate Phone")
+				console.log(result)
+			});
+			u.addCredential(username,name,"SMS_OTP",null, function(result){
+				console.log("SMS ADD")
 			})
 			u.addCredential(username, email, "STANDARD_OTP",null,function(result){
 				console.log("MB REG")
